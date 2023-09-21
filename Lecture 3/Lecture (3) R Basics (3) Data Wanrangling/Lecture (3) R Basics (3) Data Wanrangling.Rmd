@@ -1,0 +1,40 @@
+---
+title: "Lecture 3 In-class Practice"
+author: "Gao Xirui"
+date: "2023-09-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is my level 1 heading
+
+```{r}
+1+1
+```
+
+# This is my level 2 heading
+## This is my level 3 heading
+### This is my level 4 heading
+#### This is my level 5 heading
+##### This is my level 6 heading
+###### This is my level 7 heading
+####### This is my level 8 heading
+
+
+```{r}
+log(50)
+```
+```{r}
+plot(1:10, 1:10)
+```
+
+# Display data
+```{r}
+cars
+```
+
