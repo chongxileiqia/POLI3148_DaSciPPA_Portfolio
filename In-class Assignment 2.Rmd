@@ -1,0 +1,158 @@
+---
+title: "In-class Assignment 2"
+author: "Gao Xirui"
+date: "2023-10-05"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### **1. Coodbook lookup.**
+
+#### Look up the codebook, answer the following questions:
+
+#### i. What indicators regarding the quality of education are available in the V-Dem datasets?
+
+There are several types of indicators. For example, there are indoctrination indices, general curriculum, specialized subject curriculum, teachers and schools.
+
+#### ii. What are the data's coverage (i.e., for which countries and years do we have data?)
+
+The data covers all countries. The years are 1945 to 2021.
+
+#### iii. What are their sources? Provide the link to least 1 source.
+
+For example, the variable on Mathematics and science education is v2edmath. The source is Neundorf et al. (2023a, 2023b, V-Dem Working Paper Series 2023: 136); Pemstein et al. (2023, V-Dem Working Paper Series 2023:21)
+
+Another is the average years of education among citizens older than 15. The variable is e_peaveduc.
+
+### **2. Subset by columns**
+
+#### i. Create a dataset containing only the country-year identifiers and indicators of education quality.
+
+```{r include=FALSE}
+library(tidyverse)
+```
+
+```{r include=FALSE}
+d <- read_csv("C:/Users/surface/Desktop/PhD Sem1 Coursework/POLI 3148 Data Science/HKU_POLI3148_23Fall_Origin/_DataPublic_/vdem/1984_2022/vdem_1984_2022_external.csv")
+```
+
+```{r include=FALSE}
+names(d)
+```
+
+select only the country-year identifiers and indicators of education quality
+
+```{r}
+
+d_educ <- d |> 
+  select(country_name, country_id, year, e_peaveduc, e_peedgini)
+
+d_educ
+```
+
+#### ii. Rename the columns of education quality to make them informative.
+
+```{r}
+d_educ <- d_educ %>% 
+  rename("Education_year" = "e_peaveduc", "Educational_inequality" = "e_peedgini",
+         "Country" = "country_name", "ID" = "country_id",
+         "Year" = "year")
+
+d_educ
+```
+
+### **3. Subset by rows**
+
+#### i. List 5 countries-years that have the highest education level among its population.
+
+```{r}
+d_educ %>% slice_max(Education_year, n = 5)
+```
+
+#### ii. List 5 countries-years that suffer from the most severe inequality in education.
+
+Higher gini-coefficient indicates more severe inequality.
+
+```{r}
+d_educ %>% slice_max(Educational_inequality, n = 5)
+```
+
+### **4. Summarize the data**
+
+#### Check data availability:
+
+#### i. For which countries and years are the indicators of education quality available?
+
+```{r}
+d_educ %>% select(Country, ID, Year) |> distinct()
+```
+
+```{r}
+d_educ %>% 
+  group_by(Country) %>% 
+  count()
+```
+
+For most countries, there are 39 years of data.
+
+#### ii. Create two types of country-level indicators of education quality
+
+##### a. Average level of education quality from 1984 to 2022
+
+```{r}
+d_educ <-  d_educ %>% 
+  group_by(Country) %>% 
+  filter(Year >= 1984 & Year <= 2022) %>%
+  mutate(Avg_Education_Quality = mean(Education_year, na.rm = TRUE))
+```
+
+##### b. Change of education quality from 1984 to 2022
+
+```{r}
+d_educ <- d_educ %>% 
+  filter(Year >= 1984 & Year <= 2022) %>% 
+  group_by(Country) %>% 
+  mutate(Educ_quality_change_2022_1984 = last(Education_year) - first(Education_year)) %>% 
+  ungroup %>% 
+  arrange(Country)
+```
+
+#### v. Examine the data and briefly discuss: Which countries perform the best and the worst in terms of education quality in the past four decades?
+
+#### Lowest change: Tajikistan, North Korea, Russia, Azerbaijian, Uzbekistan, Kyrgyzstan. But some countries have rather absolute high education years despite low growth in education years.
+
+```{r}
+d_educ %>% 
+  group_by(Country) %>% 
+  arrange(Educ_quality_change_2022_1984)
+```
+
+#### Lowest average education years: Burkino Faso, Niger, Mali, Somalia...So, there are two ways to look at it. One is comparing the average education years of the past forty years, another is looking at the change.
+
+```{r}
+d_educ %>% 
+  group_by(Country, Year) %>% 
+  arrange(Avg_Education_Quality)
+```
+
+#### Best in terms of change in education years:Botswana, Singapore, Libya, Cuba, Chad, Egypt, Jordan, South Korea...
+
+```{r}
+d_educ %>% 
+  group_by(Country) %>%
+  arrange(desc(Educ_quality_change_2022_1984))
+
+```
+
+#### Best in terms of highest average education years:Germany, Australia, United Kingdom, Canada, Switzerland...
+
+```{r}
+d_educ %>% 
+  group_by(Country, Year) %>% 
+  arrange(-Avg_Education_Quality)
+```
